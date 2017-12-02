@@ -1,0 +1,87 @@
+{include file="common/head"}
+<div class="x-body">
+    <form action="" method="post" class="layui-form layui-form-pane">
+        <div class="layui-form-item">
+            <label for="r_name" class="layui-form-label">
+                <span class="x-red">*</span>角色名
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="r_name" name="r_name" required="" lay-verify="required"
+                       autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">
+                可分配权限
+            </label>
+            <table class="layui-table layui-input-block">
+                <tbody>
+                {volist name='auth_category' id='cate' key='k'}
+                <tr>
+                    <td style="width: 15%;text-align: center;">
+                        {$cate}
+                    </td>
+                    <td>
+                        <div class="layui-input-block">
+                            {volist name='authList'  id='v'}
+                                {if condition="$v.a_type eq $k"}
+                                    <!--<input name="id[]" type="checkbox" value="2"> 用户停用-->
+                                    <input name="a_id[{$v.a_id}]" type="checkbox" value="{$v.a_id}"> {$v.a_name}
+                                {/if}
+                            {/volist}
+                        </div>
+                    </td>
+                </tr>
+                {/volist}
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label for="r_desc" class="layui-form-label">
+                描述
+            </label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入内容" id="r_desc" name="r_desc" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <button class="layui-btn" lay-submit="" lay-filter="add">增加</button>
+        </div>
+    </form>
+</div>
+<script>
+    layui.use(['form', 'layer'], function () {
+        $ = layui.jquery;
+        var form = layui.form,layer = layui.layer;
+        //监听提交
+        form.on('submit(add)', function (data) {
+            //发异步，把数据提交给php
+            var url = "{:url('Admin/addRole')}";
+//            var a_ids = tableCheck.getData();
+//            console.log(a_ids);
+            var r_name = data.field.r_name;
+            if(r_name.length<4&&r_name.length<15){
+                layer.alert("角色名长度应该到4-15个字符之间！", {icon: 5});
+                return false;
+            }
+            toPostAjax(url,data.field,function (res) {
+                if(res){
+                    layer.alert("增加成功", {icon: 6}, function () {
+                        // 获得frame索引
+                        var index = parent.layer.getFrameIndex(window.name);
+                        //关闭当前frame
+                        parent.layer.close(index);
+                        parent.location.replace(parent.location);
+                    });
+                }else{
+                    layer.alert("增加失败！", {icon: 5});
+                }
+            });
+
+            return false;
+        });
+    });
+</script>
+</body>
+
+</html>

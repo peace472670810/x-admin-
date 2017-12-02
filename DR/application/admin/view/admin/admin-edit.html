@@ -1,0 +1,131 @@
+{include file="common/head"}
+
+<div class="x-body">
+    <form class="layui-form">
+        <input type="hidden" id="u_id" name="u_id"  value="{$admin.u_id}"/>
+        <div class="layui-form-item">
+            <label for="u_username" class="layui-form-label">
+                <span class="x-red">*</span>账户
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="u_username" name="u_username" value="{$admin.u_username}" required="" lay-verify="required"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <span class="x-red">*</span>将会成为您唯一的登入名
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="u_nickname" class="layui-form-label">
+                <span class="x-red">*</span>昵称
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="u_nickname" name="u_nickname" value="{$admin.u_nickname}"  required="" lay-verify="required"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <span class="x-red">*</span>管理员昵称
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span class="x-red">*</span>角色</label>
+            <div class="layui-input-inline">
+                <select name="u_level">
+                    {volist name='roleList' id='v'}
+                        <option lay-skin="primary" value="{$v.r_id}"  {if condition="$admin.u_level eq $v.r_id"}selected{/if}>{$v.r_name}</option>
+                    {/volist}
+                </select>
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                <span class="x-red">*</span>每个管理员只分配一个角色
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_pass" class="layui-form-label">
+                <span class="x-red"></span>密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="password" id="L_pass" name="pass" required="" lay-verify="pass"
+                       autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">
+                8到16个字符 为空不做修改
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+                <span class="x-red"></span>确认密码
+            </label>
+            <div class="layui-input-inline">
+                <input type="password" id="L_repass" name="repass" required="" lay-verify="repass"
+                       autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <button class="layui-btn" lay-filter="add" lay-submit="">
+                修改
+            </button>
+        </div>
+    </form>
+</div>
+<script>
+    layui.use(['form', 'layer'], function () {
+        $ = layui.jquery;
+        var form = layui.form
+            , layer = layui.layer;
+
+        //自定义验证规则
+        form.verify({
+            u_username: function (value) {
+                if (value.length < 6) {
+                    return '账户不能少于6个字符';
+                }
+            },
+            u_nickname: function (value) {
+                if (value.length < 5) {
+                    return '昵称至少得5个字符';
+                }
+            }
+        });
+        //监听提交
+        form.on('submit(add)', function (data) {
+            //发异步，把数据提交给php
+            $.ajax({
+                type: 'post',
+                url: "{:url('Admin/editAdmin')}",
+                data: {
+                    u_username: data.field.u_username,
+                    u_nickname: data.field.u_nickname,
+                    u_level: data.field.u_level,
+                    u_pwd: data.field.pass,
+                    u_id: data.field.u_id
+                },
+                dataType: 'json',
+                success: function (res) {
+                    if (res) {
+                        layer.alert("修改成功", {icon: 6}, function () {
+                            // 获得frame索引
+                            var index = parent.layer.getFrameIndex(window.name);
+                            //关闭当前frame
+                            parent.location.replace(parent.location.href);
+                            parent.layer.close(index);
+                        });
+                    } else {
+                        layer.alert("修改失败！", {icon: 5});
+                    }
+                },
+                error: function (res) {
+                    layer.alert("网络异常，请稍后再试！", {icon: 5});
+                }
+            });
+            return false;
+        });
+
+
+    });
+</script>
+</body>
+
+</html>
